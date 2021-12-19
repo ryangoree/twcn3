@@ -1,8 +1,8 @@
 const fs = require('fs')
-const mapFnsToCns = require('./mapFnsToCns')
-const recursiveRead = require('./recursiveRead')
+const mapFnsToCns = require('./util/mapFnsToCns')
+const recursiveRead = require('./util/recursiveRead')
 
-module.exports = async function ({ typesPath, dir, alias }) {
+module.exports = async function ({ types, dir, alias }) {
   let updatedFileCount = 0
   let updatedFunctionCount = 0
 
@@ -15,7 +15,7 @@ module.exports = async function ({ typesPath, dir, alias }) {
   //   'text-white': 'textColor',
   //   ...
   // }
-  const utilFunctions = await mapFnsToCns(typesPath)
+  const utilFunctions = await mapFnsToCns(types)
 
   await recursiveRead(
     dir,
