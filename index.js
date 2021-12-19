@@ -41,7 +41,7 @@ module.exports = async function ({ types, dir, alias }) {
               const functionName = utilFunctions[className.replace(/.*:/, '')]
               if (!functionName) {
                 console.warn(
-                  `WARNING: Couldn't find utility function for ${className}.`
+                  `WARNING: Couldn't find utility function for ${className} in ${filePath}.`
                 )
                 return classNames
               } else {
