@@ -22,7 +22,7 @@ module.exports = async function ({ types, dir, alias }) {
     async (file, filePath) => {
       const namedImports = []
       const classNamesRegExp = new RegExp(
-        `(?<=\\b${alias}\\()(\\s|(("|').*("|'))|,)+\\s*(?=\\))`,
+        `(?<=\\b${alias}\\()(\\s|(("|').*?("|'))|,)+\\s*(?=\\))`,
         'g'
       )
       const importRegExp = new RegExp(`(?<=import).*?${alias}(.|\n)*?(?=from)`)
