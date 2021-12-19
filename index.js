@@ -22,7 +22,7 @@ module.exports = async function ({ types, dir, alias }) {
     async (file, filePath) => {
       const namedImports = []
       const classNamesRegExp = new RegExp(
-        `(?<=\\b${alias}\\().*?(\\s|(("|').*?("|'))|,)+\\s*(?=\\))`,
+        `(?<=${alias}\\()([^()]|\\([^()]+\\))+(?=\\))`,
         'g'
       )
       const importRegExp = new RegExp(`(?<=import).*?${alias}(.|\n)*?(?=from)`)
@@ -35,8 +35,20 @@ module.exports = async function ({ types, dir, alias }) {
         //   becomes: classnames(display("flex"), textColor("text-black", "hover:text-black"))
         .replace(classNamesRegExp, (match) => {
           let functionUpdated = false
-          const classNames = match.replace(/("|'|\s)*/g, '').split(',')
           const noFunctionClassNames = []
+          const classNameReplaceRegExp = /(^[^\w(]+|[^\w)]+$)/g
+          const classNames = match
+            .split(',')
+            .filter((className) => {
+              if (!/^[^\w(]*["']/.test(className)) {
+                noFunctionClassNames.push(
+                  className.replace(classNameReplaceRegExp, '')
+                )
+                return false
+              }
+              return true
+            })
+            .map((className) => className.replace(classNameReplaceRegExp, ''))
           const mappedClassNames = classNames.reduce(
             (classNames, className) => {
               const functionName = utilFunctions[className.replace(/.*:/, '')]
