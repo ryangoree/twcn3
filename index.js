@@ -78,9 +78,9 @@ module.exports = async function ({ types, dir, alias }) {
               .split(',')
               .map((namedImport) => namedImport.replace(/\s+/g, ''))
           }
-          return ` tw, { ${[...existingNamedImports, ...namedImports].join(
-            ', '
-          )} } `
+          return ` tw, { ${Array.from(
+            new Set([...existingNamedImports, ...namedImports])
+          ).join(', ')} } `
         })
       if (fileUpdated) updatedFileCount++
       await fs.promises.writeFile(filePath, newContent, {
