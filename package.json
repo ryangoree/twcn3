@@ -1,0 +1,22 @@
+{
+  "name": "twcn3",
+  "version": "1.0.0-beta",
+  "description": "",
+  "main": "index.js",
+  "keywords": [],
+  "author": "Ryan Goree <goree.ryan@gmail.com>",
+  "license": "ISC",
+  "bin": "cli.js",
+  "scripts": {
+    "build:twcn": "tailwindcss-classnames -o types.ts"
+  },
+  "dependencies": {
+    "yargs": "^17.3.0"
+  },
+  "devDependencies": {
+    "tailwindcss-classnames": "^3.0.0"
+  },
+  "peerDependencies": {
+    "tailwindcss-classnames": "^3.0.0"
+  }
+}
