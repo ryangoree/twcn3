@@ -22,7 +22,7 @@ module.exports = async function ({ types, dir, alias }) {
     async (file, filePath) => {
       const namedImports = []
       const classNamesRegExp = new RegExp(
-        `(?<=\\b${alias}\\()(\\s|(("|').*?("|'))|,)+\\s*(?=\\))`,
+        `(?<=\\b${alias}\\().*?(\\s|(("|').*?("|'))|,)+\\s*(?=\\))`,
         'g'
       )
       const importRegExp = new RegExp(`(?<=import).*?${alias}(.|\n)*?(?=from)`)
@@ -36,6 +36,7 @@ module.exports = async function ({ types, dir, alias }) {
         .replace(classNamesRegExp, (match) => {
           let functionUpdated = false
           const classNames = match.replace(/("|'|\s)*/g, '').split(',')
+          const noFunctionClassNames = []
           const mappedClassNames = classNames.reduce(
             (classNames, className) => {
               const functionName = utilFunctions[className.replace(/.*:/, '')]
@@ -43,6 +44,7 @@ module.exports = async function ({ types, dir, alias }) {
                 console.warn(
                   `WARNING: Couldn't find utility function for ${className} in ${filePath}.`
                 )
+                noFunctionClassNames.push(className)
                 return classNames
               } else {
                 fileUpdated = true
@@ -57,12 +59,11 @@ module.exports = async function ({ types, dir, alias }) {
           )
           if (functionUpdated) updatedFunctionCount++
           return Object.entries(mappedClassNames).reduce(
-            (str, [functionName, classNames]) => {
-              return (str +=
+            (str, [functionName, classNames]) =>
+              (str +=
                 (str.length ? ', ' : '') +
-                `${functionName}("${classNames.join('", "')}")`)
-            },
-            ''
+                `${functionName}("${classNames.join('", "')}")`),
+            noFunctionClassNames.join(', ')
           )
         })
 
