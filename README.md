@@ -4,7 +4,7 @@ A cli utility for converting codebases upgrading from [tailwindcss-classnames](h
 
 In tailwindcss-classnames v3, you're required to use [new utility functions](https://github.com/muhammadsammy/tailwindcss-classnames/issues/293) to compose your classes rather than a single `classname` or `tw` function. Depending on the size of your codebase, this can be an incredibly time-consuming task.
 
-This utility makes does it with one command:
+This utility does it with one command:
 
 ```
 npx twcn3 convert
