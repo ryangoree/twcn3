@@ -13,7 +13,7 @@ function getClassNames(content, type) {
     .map((className) => className.replace(/(\s|'|")/g, ''))
 }
 
-module.exports = async function (typesPath) {
+module.exports.parseTypesByClassName = async function (typesPath) {
   try {
     const typesFile = await fs.promises.readFile(
       path.resolve(typesPath),

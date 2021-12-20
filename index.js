@@ -1,5 +1,5 @@
 const fs = require('fs')
-const mapFnsToCns = require('./util/mapFnsToCns')
+const { parseTypesByClassName } = require('./util/parseTypes')
 const recursiveRead = require('./util/recursiveRead')
 
 module.exports = async function ({ types, dir, alias }) {
@@ -15,7 +15,22 @@ module.exports = async function ({ types, dir, alias }) {
   //   'text-white': 'textColor',
   //   ...
   // }
-  const utilFunctions = await mapFnsToCns(types)
+  const utilFunctions = await parseTypesByClassName(types)
+
+  const getUtilFunction = (className) =>
+    utilFunctions[className.replace(/(^.*:|[`'"])/g, '')]
+
+  const warnOfMissingFunction = (className, filePath) =>
+    console.warn(
+      `WARNING: Couldn't find utility function for ${className} in ${filePath}.`
+    )
+
+  const getStringFromClassNamesObject = (classNamesObject) => {
+    const entries = Object.entries(classNamesObject)
+    return entries.length
+      ? `{ ${entries.map((pair) => pair.join(': ')).join(', ')} }`
+      : ''
+  }
 
   await recursiveRead(
     dir,
@@ -35,48 +50,129 @@ module.exports = async function ({ types, dir, alias }) {
         //   becomes: classnames(display("flex"), textColor("text-black", "hover:text-black"))
         .replace(classNamesRegExp, (match) => {
           let functionUpdated = false
-          const noFunctionClassNames = []
-          const classNameReplaceRegExp = /(^[^\w(]+|[^\w)]+$)/g
+          const mappedClassNames = {}
+          const noFnClassNames = []
+          const conditionalClassNames = {}
+          const noFnConditionalClassNames = {}
           const classNames = match
-            .split(',')
-            .filter((className) => {
-              if (!/^[^\w(]*["']/.test(className)) {
-                noFunctionClassNames.push(
-                  className.replace(classNameReplaceRegExp, '')
-                )
-                return false
-              }
-              return true
-            })
-            .map((className) => className.replace(classNameReplaceRegExp, ''))
-          const mappedClassNames = classNames.reduce(
-            (classNames, className) => {
-              const functionName = utilFunctions[className.replace(/.*:/, '')]
-              if (!functionName) {
-                console.warn(
-                  `WARNING: Couldn't find utility function for ${className} in ${filePath}.`
-                )
-                noFunctionClassNames.push(className)
-                return classNames
-              } else {
+            .split(
+              /((?<!\([^)]*)\B\s*{[^}]+}\s*\B(?!\))|(?<!(\B[`'"][^`'"]*|{[^}]*)),(?![^`'"}]*[`'}"]\B\b))/
+            )
+            .filter((className) => className && /\w/.test(className))
+            .map((className) =>
+              className.replace(/(^\s*\[?|[\r\n]+|\s*\]?$)/g, '')
+            )
+
+          for (const className of classNames) {
+            // string
+            if (/^[`'"].*[`'"]$/.test(className)) {
+              const cleanedClassName = className.trim()
+              const functionName = getUtilFunction(cleanedClassName)
+              if (functionName) {
+                namedImports.push(functionName)
+                mappedClassNames[functionName] =
+                  mappedClassNames[functionName] || []
+                mappedClassNames[functionName].push(cleanedClassName)
                 fileUpdated = true
                 functionUpdated = true
+              } else {
+                warnOfMissingFunction(cleanedClassName, filePath)
+                noFnClassNames.push(className)
               }
-              namedImports.push(functionName)
-              classNames[functionName] = classNames[functionName] || []
-              classNames[functionName].push(className)
-              return classNames
-            },
-            {}
-          )
+            }
+
+            // object
+            else if (/^{.*}$/.test(className)) {
+              className
+                .replace(/(^\s*{\s*|\s*}\s*$)/g, '')
+                .split(/(?<=\b"[^"]*),/)
+                .filter((entry) => /\w/.test(entry))
+                .forEach((entry) => {
+                  const [className, condition] = entry.split(
+                    /(?!\B"[^`'"]*):(?![^`'"]*"\B)/
+                  )
+                  const cleanedClassName = className.trim()
+                  const functionName =
+                    utilFunctions[cleanedClassName.replace(/(^.*:|[`'"])/g, '')]
+                  if (functionName) {
+                    namedImports.push(functionName)
+                    conditionalClassNames[functionName] =
+                      conditionalClassNames[functionName] || {}
+                    conditionalClassNames[functionName][cleanedClassName] =
+                      condition || cleanedClassName
+                    fileUpdated = true
+                    functionUpdated = true
+                  } else {
+                    warnOfMissingFunction(cleanedClassName, filePath)
+                    noFnConditionalClassNames[cleanedClassName] =
+                      condition || cleanedClassName
+                  }
+                })
+            }
+
+            // function or variable
+            else if (
+              !/[`'"]/.test(className) ||
+              !/(?<!\([^)]*)\B([`'"]).+?\1\B(?![^)]*\))/.test(className)
+            ) {
+              noFnClassNames.push(className)
+            }
+
+            // some other inline condition such as:
+            //   - x ? 'x' : 'y'
+            //   - x ?? 'y'
+            //   - x || 'y'
+            else {
+              noFnClassNames.push(
+                className.replace(
+                  /(?<!\([^)]*)\B([`'"]).+?\1\B(?![^)]*\))/g,
+                  (match) => {
+                    const cleanedClassName = match.trim()
+                    const functionName = getUtilFunction(cleanedClassName)
+                    if (functionName) {
+                      namedImports.push(functionName)
+                      fileUpdated = true
+                      functionUpdated = true
+                      return `${functionName}(${cleanedClassName})`
+                    } else {
+                      warnOfMissingFunction(cleanedClassName, filePath)
+                      return match
+                    }
+                  }
+                )
+              )
+            }
+          }
           if (functionUpdated) updatedFunctionCount++
-          return Object.entries(mappedClassNames).reduce(
-            (str, [functionName, classNames]) =>
-              (str +=
-                (str.length ? ', ' : '') +
-                `${functionName}("${classNames.join('", "')}")`),
-            noFunctionClassNames.join(', ')
+          const newClassNames = [noFnClassNames.join(', ')]
+          newClassNames.push(
+            getStringFromClassNamesObject(noFnConditionalClassNames)
           )
+          const mappedEntries = Object.entries(mappedClassNames)
+          if (mappedEntries.length) {
+            newClassNames.push(
+              mappedEntries
+                .map(
+                  ([functionName, classNames]) =>
+                    `${functionName}(${classNames.join(', ')})`
+                )
+                .join(', ')
+            )
+          }
+          const conditionalEntries = Object.entries(conditionalClassNames)
+          if (conditionalEntries.length) {
+            newClassNames.push(
+              conditionalEntries
+                .map(
+                  ([functionName, classNamesObj]) =>
+                    `${functionName}(${getStringFromClassNamesObject(
+                      classNamesObj
+                    )})`
+                )
+                .join(', ')
+            )
+          }
+          return newClassNames.filter(Boolean).join(', ')
         })
 
         // add required util functions to imports
