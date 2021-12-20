@@ -86,14 +86,13 @@ module.exports = async function ({ types, dir, alias }) {
               className
                 .replace(/(^\s*{\s*|\s*}\s*$)/g, '')
                 .split(/(?<=\b"[^"]*),/)
-                .filter((entry) => /\w/.test(entry))
+                .filter((entry) => entry && /\w/.test(entry))
                 .forEach((entry) => {
                   const [className, condition] = entry.split(
                     /(?!\B"[^`'"]*):(?![^`'"]*"\B)/
                   )
                   const cleanedClassName = className.trim()
-                  const functionName =
-                    utilFunctions[cleanedClassName.replace(/(^.*:|[`'"])/g, '')]
+                  const functionName = getUtilFunction(cleanedClassName)
                   if (functionName) {
                     namedImports.push(functionName)
                     conditionalClassNames[functionName] =

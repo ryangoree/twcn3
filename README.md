@@ -6,11 +6,36 @@ In tailwindcss-classnames v3, you're required to use [new utility functions](htt
 
 This utility does it with one command:
 
-```
+```bash
 npx twcn3 convert
 ```
 
-## Options
+## Multiple Directories
+
+```bash
+npx twcn3 convert -d layouts
+npx twcn3 convert -d pages
+```
+
+## Custom Config
+
+```bash
+npx twcn3 convert -t <path-to-built-types-file>
+```
+
+## Custom Import Alias
+
+```jsx
+// sample.tsx
+
+import tailwind from 'tailwindcss-classnames'
+```
+
+```bash
+npx twcn3 convert -a tailwind
+```
+
+## All Options
 
 - **`--version`** - Show version number
 - **`--help`** - Show help
