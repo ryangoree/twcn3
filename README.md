@@ -42,4 +42,4 @@ npx twcn3 convert -a tailwind
 - **`-t`, `--types <path-to-types>`** - The path to your built tailwindcss-classnames types file. Only required if you have custom classes.
 - **`-d`, `--dir <path-to-src>`** - The path to the directory with the files to be converted.
 (**default: `src`**)
-- **`-a`, `--alias <function-name>`** - The name used when importing the classnames function from your type file. (i.e. <code>import <strong>tw</strong> from 'tailwindcss-classnames.ts'</code>) (**default: `tw`**)
+- **`-a`, `--alias <function-name>`** - The name used when importing the classnames function from your type file. (i.e. <code>import <strong>tw</strong> from 'tailwindcss-classnames'</code>) (**default: `tw`**)
