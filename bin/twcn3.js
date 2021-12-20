@@ -3,7 +3,7 @@
 const yargs = require('yargs')
 const { hideBin } = require('yargs/helpers')
 const path = require('path')
-const convert = require('./index')
+const convert = require('../index')
 
 yargs(hideBin(process.argv))
   .command(

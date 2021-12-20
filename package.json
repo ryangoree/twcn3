@@ -7,7 +7,7 @@
   "author": "Ryan Goree <goree.ryan@gmail.com>",
   "license": "MIT",
   "repository": "https://github.com/ryangoree/twcn3.git",
-  "bin": "cli.js",
+  "bin": "bin/twcn3.js",
   "scripts": {
     "build:twcn": "tailwindcss-classnames -o types.ts"
   },
