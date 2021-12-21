@@ -2,7 +2,7 @@ const fs = require('fs')
 const { parseTypesByClassName } = require('./util/parseTypes')
 const recursiveRead = require('./util/recursiveRead')
 
-module.exports = async function ({ types, dir, alias }) {
+module.exports = async function ({ types, src, alias }) {
   let updatedFileCount = 0
   let updatedFunctionCount = 0
 
@@ -33,7 +33,7 @@ module.exports = async function ({ types, dir, alias }) {
   }
 
   await recursiveRead(
-    dir,
+    src,
     async (file, filePath) => {
       const namedImports = []
       const classNamesRegExp = new RegExp(
