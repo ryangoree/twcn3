@@ -10,11 +10,12 @@ This utility does it with one command:
 npx twcn3 convert
 ```
 
-## Multiple Directories
+## Multiple Directories and/or files
 
 ```bash
-npx twcn3 convert -d layouts
-npx twcn3 convert -d pages
+npx twcn3 convert -s layouts
+npx twcn3 convert -s pages
+npx twcn3 convert -s index.js
 ```
 
 ## Custom Config
@@ -40,6 +41,6 @@ npx twcn3 convert -a tailwind
 - **`--version`** - Show version number
 - **`--help`** - Show help
 - **`-t`, `--types <path-to-types>`** - The path to your built tailwindcss-classnames types file. Only required if you have custom classes.
-- **`-d`, `--dir <path-to-src>`** - The path to the directory with the files to be converted.
+- **`-s`, `--src <path-to-src>`** - The path to a directory or file to be converted.
 (**default: `src`**)
 - **`-a`, `--alias <function-name>`** - The name used when importing the classnames function from your type file. (i.e. <code>import <strong>tw</strong> from 'tailwindcss-classnames'</code>) (**default: `tw`**)

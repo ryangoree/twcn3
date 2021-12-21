@@ -16,9 +16,9 @@ yargs(hideBin(process.argv))
           describe: 'The path to your built tailwindcss-classnames types file.',
           default: path.join(__dirname, 'types.ts'),
         })
-        .option('dir', {
-          alias: 'd',
-          describe: 'The path to the directory with the files to be converted.',
+        .option('src', {
+          alias: 's',
+          describe: 'The path to a directory or file to be converted.',
           default: 'src',
         })
         .option('alias', {
