@@ -14,7 +14,7 @@ yargs(hideBin(process.argv))
         .option('types', {
           alias: 't',
           describe: 'The path to your built tailwindcss-classnames types file.',
-          default: path.join(__dirname, 'types.ts'),
+          default: path.join(__dirname, '../types.ts'),
         })
         .option('src', {
           alias: 's',
