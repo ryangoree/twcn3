@@ -40,7 +40,7 @@ module.exports = async function ({ types, src, alias }) {
         `(?<=${alias}\\()([^()]|\\([^()]+\\))+(?=\\))`,
         'g'
       )
-      const importRegExp = new RegExp(`(?<=import).*?${alias}(.|\n)*?(?=from)`)
+      const importRegExp = new RegExp(`(?<=import).*?${alias}(.|[\r\n])*?(?=from)`)
       let fileUpdated = false
       const newContent = file
 

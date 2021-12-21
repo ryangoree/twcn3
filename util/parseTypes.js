@@ -19,7 +19,7 @@ module.exports.parseTypesByClassName = async function (typesPath) {
       path.resolve(typesPath),
       'utf8'
     )
-    const utilFunctionsMatch = typesFile.match(/(?<=TW\s*=\s*\{\n)[^\}]+/)
+    const utilFunctionsMatch = typesFile.match(/(?<=TW\s*=\s*\{[\r\n]+)[^\}]+/)
     if (!utilFunctionsMatch || !utilFunctionsMatch[0]) {
       throw new Error(`Can't find utility functions definition.`)
     }
